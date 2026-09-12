@@ -1,65 +1,62 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { login } from '../api';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { getCurrentUser, logout, isLoggedIn } from '../api';
 
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function Dashboard() {
+  const [user, setUser] = useState(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const justRegistered = location.state?.registered;
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      await login(email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate('/login');
+      return;
     }
+
+    async function loadUser() {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUser();
+  }, [navigate]);
+
+  function handleLogout(e) {
+    e.preventDefault();
+    logout();
+    navigate('/');
   }
+
+  if (loading) return <div className="card">Loading...</div>;
 
   return (
     <div className="card">
-      <h1>Login</h1>
-      {justRegistered && (
-        <div className="success">Account created! Please log in.</div>
-      )}
+      <h1>Dashboard</h1>
       {error && <div className="error">{error}</div>}
       
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Log in'}
-        </button>
-      </form>
-      
-      <p style={{ marginTop: '20px' }}>
-        Don't have an account? <Link to="/signup">Sign up</Link>
-      </p>
+      {user && (
+        <>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Name:</strong> {user.full_name || 'Not set'}</p>
+          <p>
+            <strong>Member since:</strong>{' '}
+            {new Date(user.created_at).toLocaleDateString()}
+          </p>
+          
+          <div className="nav" style={{ marginTop: '20px' }}>
+            <Link to="/" onClick={handleLogout}>Log out</Link>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-export default Login;
+export default Dashboard;
