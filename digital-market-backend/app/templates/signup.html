@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Digital Market{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Sign Up</h1>
+    <div class="error" id="error-msg"></div>
+    
+    <form id="signup-form">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="full_name" placeholder="Full name (optional)">
+        <input type="password" name="password" placeholder="Password (min 8 chars)" required minlength="8">
+        <button type="submit">Create account</button>
+    </form>
+    
+    <p style="margin-top: 20px;">
+        Already have an account? <a href="/login">Log in</a>
+    </p>
+</div>
+
+<script>
+    const form = document.getElementById('signup-form');
+    const errorMsg = document.getElementById('error-msg');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMsg.style.display = 'none';
+        
+        const formData = new FormData(form);
+        const data = {
+            email: formData.get('email'),
+            full_name: formData.get('full_name') || null,
+            password: formData.get('password'),
+        };
+        
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.detail || 'Signup failed');
+            }
+            
+            // Success - redirect to login
+            window.location.href = '/login?registered=1';
+        } catch (err) {
+            errorMsg.textContent = err.message;
+            errorMsg.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

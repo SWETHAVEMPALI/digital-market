@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Digital Market{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Dashboard</h1>
+    <div class="error" id="error-msg"></div>
+    <div id="user-info">Loading...</div>
+</div>
+
+<script>
+    const errorMsg = document.getElementById('error-msg');
+    const userInfo = document.getElementById('user-info');
+    
+    async function loadUser() {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/me', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/login';
+                    return;
+                }
+                throw new Error('Failed to load user');
+            }
+            
+            const user = await response.json();
+            userInfo.innerHTML = `
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Name:</strong> ${user.full_name || 'Not set'}</p>
+                <p><strong>Member since:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
+                <div class="nav" style="margin-top: 20px;">
+                    <a href="#" id="logout-link">Log out</a>
+                </div>
+            `;
+            
+            document.getElementById('logout-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('access_token');
+                window.location.href = '/';
+            });
+        } catch (err) {
+            errorMsg.textContent = err.message;
+            errorMsg.style.display = 'block';
+        }
+    }
+    
+    loadUser();
+</script>
+{% endblock %}
