@@ -19,7 +19,7 @@ class ProductOut(BaseModel):
     description: Optional[str] = None
     price: Decimal
     file_name: Optional[str] = None
-    is_published: int
+    is_published: bool
     seller_id: int
     created_at: datetime
     updated_at: datetime

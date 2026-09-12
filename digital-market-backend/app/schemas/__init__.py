@@ -1,3 +1,3 @@
-"""Routers package."""
-from app.routers import auth
-from app.routers import products
+"""Pydantic schemas package."""
+from app.schemas.user import UserCreate, UserOut
+from app.schemas.product import ProductCreate, ProductOut

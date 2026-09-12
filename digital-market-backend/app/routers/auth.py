@@ -12,6 +12,7 @@ from app.core.security import (
     verify_password,
     create_access_token,
 )
+from app.core.deps import get_current_user, get_current_admin
 from app.config import settings
 
 
@@ -61,3 +62,18 @@ def login(
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@router.get("/me", response_model=UserOut)
+def get_me(current_user: User = Depends(get_current_user)):
+    """Get the currently logged-in user's info."""
+    return current_user
+
+
+@router.get("/users", response_model=list[UserOut])
+def list_users(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """List all users. Admin only."""
+    return db.query(User).all()

@@ -1,6 +1,5 @@
 """Product database model."""
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -16,7 +15,7 @@ class Product(Base):
     price = Column(Numeric(precision=10, scale=2), nullable=False)
     file_path = Column(String, nullable=True)  # Path to file on disk
     file_name = Column(String, nullable=True)  # Original filename
-    is_published = Column(Integer, default=1)  # 1 = published, 0 = draft
+    is_published = Column(Boolean, default=True)  # True = published, False = draft
     
     # Foreign key to User
     seller_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)

@@ -8,9 +8,8 @@ from typing import Optional
 from app.database import get_db
 from app.models.product import Product
 from app.models.user import User
-from app.schemas.product import ProductCreate, ProductOut
+from app.schemas.product import ProductOut
 from app.core.deps import get_current_user
-from app.config import settings
 
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -80,7 +79,7 @@ def list_products(
     """List all published products. Requires authentication."""
     products = (
         db.query(Product)
-        .filter(Product.is_published == 1)
+        .filter(Product.is_published == True)  # noqa: E712
         .order_by(Product.created_at.desc())
         .offset(skip)
         .limit(limit)

@@ -9,7 +9,6 @@ from app.config import settings
 
 
 # Create the database engine - this is the actual connection to Postgres
-# The connect_args is needed for SQLite but harmless for Postgres
 engine = create_engine(
     settings.database_url,
     echo=settings.debug,  # When True, prints all SQL queries. Useful for learning
